@@ -15,7 +15,7 @@ __DIP__ states that High-level modules should not depend on low-level modules. B
 ### Implementation
 1. __Implementation of__ ___SRP___\
 In my project, every class designed to handle a specific aspect of the system, ensuring that responsibilities are well-separated. This helps enhance code readability and maintainability but also simplifies debugging and future feature additions.\
-For example, the ___User___ class is responsible for representing and managing user data.\
+For example, the ___User___ class is responsible for representing and managing user data.gi
 
   `public class User {`\
    `private String name;`\
@@ -39,21 +39,21 @@ The EmailService class manages the sending of emails.
 `}
 }`
 
-The PasswordEncryptor class handles password encryption. \
+The PasswordEncryptor class handles password encryption. 
 
 `public class PasswordEncryptor implements IPasswordEncryptor {`\
 `@Override`\
 `public String encrypt(String password) {`\
 `return Base64.getEncoder().encodeToString(password.getBytes());`\
 `}
-}`\
+}`
 
 The UserRegistrationService manages user registration and password changes. 
 
 `public class UserRegistrationService {`\
 `private final IUserRepository userRepository;`\
 `private final IEmailService emailService;`\
-`private final IPasswordEncryptor passwordEncryptor;`\
+`private final IPasswordEncryptor passwordEncryptor;`
 
 #### Benefits of Implementing SRP 
 + Changes in one aspect don't impact other parts of the system.
