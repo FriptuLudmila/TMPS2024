@@ -1,3 +1,6 @@
+import PaymentAdapter from '../Adapter/PaymentAdapter.js';
+
+
 class Order {
     constructor(builder) {
       this.customer = builder.customer;
@@ -30,6 +33,18 @@ class Order {
     setStatus(status) {
       this.status = status;
     }
+
+    processPayment() {
+      const paymentAdapter = new PaymentAdapter();
+      const amount = this.getTotalAmount();
+      const paymentSuccessful = paymentAdapter.process(amount, this.paymentMethod);
+  
+      if (paymentSuccessful) {
+        this.setStatus('Paid');
+      } else {
+        this.setStatus('Payment Failed');
+      }
+    }
   
     getOrderSummary() {
       const itemDetails = this.items.map(
@@ -38,17 +53,33 @@ class Order {
             item.product.price * item.quantity
           }`
       );
+    
+      // Format the payment method
+      let paymentMethodDisplay = '';
+    
+      if (typeof this.paymentMethod === 'string') {
+        paymentMethodDisplay = this.paymentMethod;
+      } else if (typeof this.paymentMethod === 'object' && this.paymentMethod !== null) {
+        // For security, mask the card number
+        const cardNumber = this.paymentMethod.cardNumber;
+        const maskedCardNumber = cardNumber.slice(0, -4).replace(/\d/g, '*') + cardNumber.slice(-4);
+        paymentMethodDisplay = `Credit Card ending with ${maskedCardNumber}, Expiry: ${this.paymentMethod.expiry}`;
+      } else {
+        paymentMethodDisplay = 'Unknown';
+      }
+    
       return `
-  Order Summary:
-  Customer: ${this.customer.name}
-  Items:
-  ${itemDetails.join('\n')}
-  Total Amount: $${this.getTotalAmount()}
-  Shipping Address: ${this.shippingAddress}
-  Payment Method: ${this.paymentMethod}
-  Status: ${this.status}
+    Order Summary:
+    Customer: ${this.customer.name}
+    Items:
+    ${itemDetails.join('\n')}
+    Total Amount: $${this.getTotalAmount()}
+    Shipping Address: ${this.shippingAddress}
+    Payment Method: ${paymentMethodDisplay}
+    Status: ${this.status}
       `;
     }
+    
   }
 
   export default Order;

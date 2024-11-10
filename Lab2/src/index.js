@@ -1,54 +1,38 @@
-import Logger from './singleton/Logger.js';
-import Database from './singleton/Database.js';
-import Configuration from './singleton/Configuration.js';
-import UserFactory from './factory/UserFactory.js';
-import ProductFactory from './factory/ProductFactory.js';
-import OrderBuilder from './builder/OrderBuilder.js';
- 
 
-// Initialize Singletons
-const logger = new Logger();
-const dbInstance1 = new Database();
-const dbInstance2 = new Database();
-logger.log('Application started');
-console.log('Are both database instances the same?', dbInstance1 === dbInstance2);
+import OnlineShopFacade from './domain/OnlineShopFacade.js';
+import GiftWrapper from './Decorator/GiftWrapper.js';
 
-const config = new Configuration();
-config.setSetting('appName', 'Online Shop');
-console.log('Application Name:', config.getSetting('appName'));
+const shop = new OnlineShopFacade();
 
-// Use Factories to create users and products
-const userFactory = new UserFactory();
-const customer = userFactory.createUser('customer', 'Friptu Ludmila', 'ldd33@example.com');
-const admin = userFactory.createUser('admin', 'Admin User', 'admin@example.com');
+// Register users
+shop.registerUser('customer', 'Friptu Ludmila', 'ldd33@email.com');
+shop.registerUser('admin', 'Admin User', 'admin@email.com');
 
-console.log(customer.getInfo());
-console.log(admin.getInfo());
+// Create products
+const perfume = shop.createProduct('perfumes', 'Chanel 5', 200, 'aldehydic');
+shop.createProduct('skin care', 'Purito Green Serum', 30, 'acne prone skin');
 
-logger.log('Order created for customer: ' + customer.name);
+// Decorate products
+const giftWrappedPerfume = new GiftWrapper(perfume);
 
-const productFactory = new ProductFactory();
-const perfume = productFactory.createProduct('perfumes', 'Chanel 5', 200, 'aldehydic');
-const skincare = productFactory.createProduct('skin care', 'Purito Green Serum', 30, 'acne prone skin');
+// Add the decorated product to the shop's products
+shop.products['Chanel 5 (Gift Wrapped)'] = giftWrappedPerfume;
 
-console.log(perfume.getDetails());
-console.log(skincare.getDetails());
+// Place order
+const order = shop.placeOrder(
+  'ldd33@email.com',
+  [
+    { productName: 'Chanel 5 (Gift Wrapped)', quantity: 1 },
+    { productName: 'Purito Green Serum', quantity: 2 },
+  ],
+  '12/3 Balcani, Chisinau, Moldova',
+  { cardNumber: '1234567890123456', expiry: '12/25', cvv: '123' },
+  'BLACKFRIDAY'
+);
 
-// Build an Order using OrderBuilder
-const orderBuilder = new OrderBuilder(customer);
-
-const order = orderBuilder
-  .addItem(perfume, 1)
-  .addItem(skincare, 2)
-  .setShippingAddress('12/3 Balcani,Chisinau, Moldova')
-  .setPaymentMethod('Credit Card')
-  .build();
-
+// Output order summary
 console.log(order.getOrderSummary());
 
-order.applyDiscount('BLACKFRIDAY');
-console.log('Total Amount after discount: $' + order.getTotalAmount());
-
-// Simulate Order Processing
-order.setStatus('Shipped');
-console.log('Updated Order Status:', order.status);
+// Process payment
+order.processPayment();
+console.log('Order Status after payment:', order.status);
